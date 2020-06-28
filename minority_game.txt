@@ -1,0 +1,287 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+#include<math.h>
+int main (){
+	int n=51, m=2, s=2, cont2=0;
+	int r,c,i, j, k, temp, max, cont, ind_max1[s], n_cicli=0, a, b, som, ripetizioni=0, ripetizioni_max=5000, m_max;
+	float media=0., varianza, mediaq=0., medmediaq=0., array[ripetizioni_max], dev=0.;
+	srand(time(NULL));
+	FILE *ptr_file;
+	ptr_file=fopen("dati_tot.txt", "a+");
+	FILE *ptr_file1;
+	ptr_file1=fopen("dati_grezzi.txt", "a+");
+	while(n<=301){
+		ripetizioni=0;
+		int ind_max[n];
+	if(n==101||n==51){
+		m_max=8;
+	}
+	if(n==201||n==251||n==301){
+		m_max=7;
+	}
+	while(m<=m_max){
+	r=pow(2,m)+1;
+	c=m+s;
+	int mem[m];
+	int agenti[n][r][c];
+	printf("ciao\n");
+	while(ripetizioni<ripetizioni_max){
+	mediaq=0.;
+	media=0.;
+	varianza=0.;
+	n_cicli=0;
+	for(i=0;i<n;i++){
+		for(j=0;j<r;j++){
+			for(k=0;k<c;k++){
+				agenti[i][j][k]=0;
+				//printf("%d ", agenti[i][j][k]);
+			}
+			//printf("\n");
+		}
+		//printf("\n\n\n");
+	}
+	//generazione delle strategie
+	for(i=0;i<n;i++){
+		for(j=0;j<r-1;j++){
+			for(k=m;k<m+s;k++){
+				temp=rand()%2;
+				if (temp==0){
+					temp=-1;
+				}
+				agenti[i][j][k]=temp;
+				//printf("%d ", agenti[i][j][k]);
+			}
+			//printf("\n");
+		}
+		//printf("\n\n\n");
+	}
+	/*for(i=0;i<n;i++){
+		for(j=0;j<r;j++){
+			for(k=0;k<c;k++){
+				printf("%d ", agenti[i][j][k]);
+			}
+			printf("\n");
+		}
+		printf("\n\n\n");
+	}*/
+	for(i=0;i<m;i++){
+		temp=rand()%2;
+		if (temp==0){
+			temp=-1;
+		}
+		mem[i]=temp;
+	}
+	//scelta della strategia
+	/*for(i=0;i<n;i++){
+		for(j=m;j<c;j++){
+			agenti[i][r-1][j]=rand()%3;
+		}
+	}
+	for(i=0;i<n;i++){
+		for(j=0;j<r;j++){
+			for(k=0;k<c;k++){
+				printf("%d ", agenti[i][j][k]);				//cicli fatti per verificare che la scelta venga effettuata correttamente
+			}
+			printf("\n");
+		}
+		printf("\n\n\n");
+	}*/
+	while(n_cicli<10000){
+	/*	for(i=0;i<m;i++){
+			printf("%d ",mem[i]);
+		}
+		printf ("\nvet memoria\n");*/
+	for(i=0;i<n;i++){
+		max=0;
+		cont=0;
+		for(j=0;j<s;j++){
+			ind_max1[j]=0;
+		}
+		for(j=m;j<m+s;j++){
+			if (agenti[i][r-1][j]>=max){
+				max=agenti[i][r-1][j];
+				ind_max[i]=j;
+			}
+		}
+		for (j=m;j<m+s;j++){
+			if (max==agenti[i][r-1][j]){
+				ind_max1[cont]=j;
+				cont++;
+			}
+		}
+		if (cont>1){
+			ind_max[i]=ind_max1[rand()%cont];
+		}
+		//printf ("l'indice di interesse per l'agente %d e' il %d\n", i, ind_max[i]);
+	}
+	//verifica se negli input è presente un vettore identico a quello delle ultime strategie se non è presente si genera
+	a=0;
+	for(i=0;i<r-1;i++){
+		cont=0;
+		for(j=0;j<m;j++){
+			if(agenti[0][i][j]==mem[j]){
+				cont++;
+			}
+			if (cont==m){
+				a=1;
+				break;
+			}
+		}
+	}
+	//se non è presente lo mette nella porima posizine degli input disponibile, questo fatto per tutti gli agenti
+	b=-1;
+	som=0;
+	if (a!=1){
+		for(i=0;i<r-1;i++){
+			for(j=0;j<m;j++){
+				if (agenti[0][i][j]==0){
+					b=i;
+					break;
+				}
+				if(agenti[0][i][j]!=0){
+					continue;
+				}
+			}
+			if (b!=-1){
+				break;
+			}
+		}
+		for(i=0;i<n;i++){
+			for(j=0;j<m;j++){
+				agenti[i][b][j]=mem[j];
+			}
+		}
+		for(i=0;i<n;i++){
+			som=som+agenti[i][b][ind_max[i]];
+		}
+		//printf("sono entrato qui");
+	}
+	//se la disposizione delle ultime m uscite è già presente basta solo capire che disposizine è e sommare le scelte
+	if(a==1){
+		b=-1;
+		som=0;
+		for(i=0;i<r-1;i++){
+			cont=0;
+			for(j=0;j<m;j++){
+				if(agenti[0][i][j]==mem[j]){
+					cont++;
+				}
+			}
+			if(cont==m){
+				b=i;
+				break;
+			}
+		}
+		for(i=0;i<n;i++){
+			som=som+agenti[i][b][ind_max[i]];
+		}
+	}
+	for(i=1;i<m;i++){
+		mem[i-1]=mem[i];
+	}
+
+	if(som>0){
+		mem[m-1]=-1;
+	}
+	if(som<0){
+		mem[m-1]=1;
+	}
+	//printf(" A=%d\n", som);
+/*	for(i=0;i<m;i++){
+		printf(" %d ",mem[i]);
+	}
+	printf(" mem e'\n");
+	
+	for(i=0;i<n;i++){
+		for(j=0;j<r;j++){
+			for(k=0;k<c;k++){
+				printf("%d ", agenti[i][j][k]);
+			}
+			printf("\n");
+		}
+		printf("ind_max=%d\n\n\n",ind_max[i]);
+	}*/
+/*	for(i=0;i<r;i++){
+		for(j=0;j<c;j++){
+			printf("%d ",agenti[0][i][j]);
+		}
+		printf("\n");
+	}
+	printf("coordinate scleta=%d   %d\n\n\n",b, ind_max[0]);*/
+	if(som==0 || som>n || som<-n ){
+		printf ("ti avverto som=%d\n", som);
+	}
+	//assegnazione dei punteggi
+	for(i=0;i<n;i++){
+		for(j=m;j<m+s;j++){
+			if(som>0 && agenti[i][b][j]==-1){
+				agenti[i][r-1][j]=agenti[i][r-1][j]+1;
+			}
+			if(som<0 && agenti[i][b][j]==1){
+				agenti[i][r-1][j]=agenti[i][r-1][j]+1;
+			}
+		}
+	}
+///for(i=0;i<n;i++){
+		/*for(j=m;j<c;j++){
+			printf ("%d ", agenti[0][r-1][j]);
+		}
+		printf("\n\n\n");
+	//}*/
+	/*FILE *ptr_file;
+	ptr_file=fopen("dati.txt", "a+");
+	fprintf(ptr_file,"%d\n",som);*/
+	media=(float)som+media;
+	mediaq=(float)(som*som)+mediaq;
+	//printf("%f\n", mediaq);
+	
+	
+	n_cicli++;
+	}
+	//printf("%f\n", mediaq);
+	media=(float)media/n_cicli;
+	mediaq=(float)mediaq/n_cicli;
+	varianza=mediaq-(media*media);
+	/*FILE *ptr_file;
+	ptr_file=fopen("dati.txt", "a+");
+	fprintf(ptr_file,"%f\t%f\n",(float)(r-1)/n, mediaq/n);*/
+	//printf("%f\n",(float)mediaq/n);
+	array[ripetizioni]=(float)mediaq/n;
+	if(ripetizioni==0){
+		fprintf(ptr_file1,"m=%d\t%d\talfa=%f\n",m,n,(float)(r-1)/n);
+	}
+	fprintf(ptr_file1,"%f\n",(float)mediaq/n);
+	if(ripetizioni==ripetizioni_max-1){
+		fprintf(ptr_file1,"fine\n");
+	}
+	
+	ripetizioni++;
+	medmediaq=mediaq+medmediaq;
+
+	}
+	medmediaq=(float)medmediaq/n;
+	medmediaq=(float)medmediaq/ripetizioni;
+	for(i=0;i<ripetizioni;i++){
+		dev=pow(array[i]-medmediaq,2.)+dev;
+		//printf("%f\n", array[i]);
+	}
+	//printf("%d\n", ripetizioni);
+	dev=(float)sqrt((float)dev/ripetizioni);
+	fprintf(ptr_file,"%f\t%f\t%f\n",(float)(r-1)/n, (float)medmediaq, dev);
+	printf("n=%d   m=%d\n",n,m);
+	printf("%f\t%f\t%f\n",(float)(r-1)/n, (float)medmediaq, dev);
+	m++;
+	ripetizioni=0;
+	}
+	m=2;
+	n=n+50;
+	if (n==151){
+		n=201;
+	}
+	
+	}
+	
+
+}
+
